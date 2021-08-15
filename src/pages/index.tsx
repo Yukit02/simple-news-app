@@ -2,6 +2,7 @@ import Head from 'next/head'
 import MainLayout from '../layouts'
 import styles from '../styles/Home.module.scss'
 import Article from '../components/article'
+import Nav from "../components/nav";
 
 export default function Home(props) {
   return (
@@ -10,11 +11,21 @@ export default function Home(props) {
         <title>Simple News</title>
       </Head>
 
-      <div className={styles.main}>
-        <Article title="headlines" articles={props.topArticles} />
+      <div className={styles.contents}>
+        <div className={styles.nav}>
+          <nav>
+            <Nav />
+          </nav>
+        </div>
+
+        <div className={styles.blank} />
+
+        <div className={styles.main} >
+          <Article title="headline" articles={props.topArticles} />
+        </div>
       </div>
     </MainLayout>
-  )
+  );
 }
 
 export const getStaticProps = async () => {
