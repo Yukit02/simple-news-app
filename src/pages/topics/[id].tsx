@@ -4,6 +4,8 @@ import Article from '../../components/article'
 import Nav from '../../components/nav'
 import MainLayout from "../../layouts/index";
 import styles from "../../styles/Home.module.scss";
+import WeatherNews from "../../components/weather-news";
+import PickupArticle from "../../components/pickup-article";
 
 function Topic(props) {
   const router = useRouter();
@@ -26,6 +28,11 @@ function Topic(props) {
         <div className={styles.main} style={{marginRight:"10%"}}>
           <Article title={props.title} articles={props.topicArticles} />
         </div>
+
+        <div className={styles.aside}>
+          <WeatherNews weatherNews={props.weatherNews} />
+          <PickupArticle articles={props.pickupArticles} />
+        </div>
       </div>
     </MainLayout>
   );
@@ -39,6 +46,9 @@ export async function getStaticPaths() {
 }
 
 export async function getStaticProps({ params }) {
+  const pageSize = 5;
+  const sortBy = "popularity"
+
   const topicRes = await fetch(
     `https://newsapi.org/v2/top-headlines?country=jp&category=${params.id}&country=jp&apiKey=${process.env.REACT_APP_NEWS_API_KEY}`
   );
@@ -47,8 +57,23 @@ export async function getStaticProps({ params }) {
 
   const title = params.id;
 
+  // OpenWeatherMapの天気の情報を取得
+  const weatherRes = await fetch(
+    `https://api.openweathermap.org/data/2.5/onecall?lat=35.4122&lon=139.4130&units=metric&exclude=hourly,minutely&appid=${process.env.REACT_APP_OPEN_WEATHER_API_KEY}`
+  );
+  const weatherJson = await weatherRes.json();
+  const weatherNews = weatherJson;
+
+  // NewsAPIのピックアップ記事の情報を取得
+  const pickupKeyword = "software";
+  const pickupRes = await fetch(
+    `https://newsapi.org/v2/everything?q=${pickupKeyword}&language=jp&sortBy=${sortBy}&pageSize=${pageSize}&apiKey=${process.env.REACT_APP_NEWS_API_KEY}`
+  );
+  const pickupJson = await pickupRes.json();
+  const pickupArticles = pickupJson?.articles;
+
   return {
-    props: { topicArticles, title },
+    props: { topicArticles, title, weatherNews, pickupArticles },
     revalidate: 60 * 10,
   };
 }
